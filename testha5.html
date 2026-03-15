@@ -1,0 +1,2099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeadTrack — Sales Intelligence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%231e40af'/><rect x='7' y='10' width='18' height='2' rx='1' fill='white'/><rect x='7' y='15' width='12' height='2' rx='1' fill='white'/><rect x='7' y='20' width='15' height='2' rx='1' fill='white'/></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & TOKENS ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Neutral */
+  --gray-50:  #f8fafc;
+  --gray-100: #f1f5f9;
+  --gray-200: #e2e8f0;
+  --gray-300: #cbd5e1;
+  --gray-400: #94a3b8;
+  --gray-500: #64748b;
+  --gray-600: #475569;
+  --gray-700: #334155;
+  --gray-800: #1e293b;
+  --gray-900: #0f172a;
+  --gray-950: #020617;
+
+  /* Brand */
+  --blue-50:  #eff6ff;
+  --blue-100: #dbeafe;
+  --blue-200: #bfdbfe;
+  --blue-500: #3b82f6;
+  --blue-600: #2563eb;
+  --blue-700: #1d4ed8;
+  --blue-900: #1e3a8a;
+
+  /* Semantic */
+  --green-50:  #f0fdf4;
+  --green-100: #dcfce7;
+  --green-200: #bbf7d0;
+  --green-600: #16a34a;
+  --green-700: #15803d;
+  --green-800: #166534;
+  --green-900: #14532d;
+
+  --red-50:   #fef2f2;
+  --red-200:  #fecaca;
+  --red-600:  #dc2626;
+
+  --amber-50:  #fffbeb;
+  --amber-100: #fef3c7;
+  --amber-200: #fde68a;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+
+  --purple-50:  #faf5ff;
+  --purple-100: #f3e8ff;
+  --purple-200: #e9d5ff;
+  --purple-600: #9333ea;
+  --purple-700: #7e22ce;
+
+  --orange-50:  #fff7ed;
+  --orange-100: #ffedd5;
+  --orange-200: #fed7aa;
+  --orange-600: #ea580c;
+
+  --pink-50:  #fdf2f8;
+  --pink-100: #fce7f3;
+  --pink-200: #fbcfe8;
+  --pink-600: #db2777;
+
+  /* Surfaces */
+  --bg:       var(--gray-50);
+  --surface:  #ffffff;
+  --surface2: var(--gray-100);
+  --surface3: var(--gray-200);
+
+  /* Borders */
+  --border:   var(--gray-200);
+  --border2:  var(--gray-300);
+
+  /* Text */
+  --text:     var(--gray-900);
+  --text2:    var(--gray-600);
+  --text3:    var(--gray-400);
+
+  /* Accent */
+  --accent:   var(--blue-600);
+  --accent-h: var(--blue-700);
+  --accent-bg:var(--blue-50);
+
+  /* Sidebar */
+  --sidebar-w: 220px;
+  --sidebar-bg: var(--gray-900);
+
+  /* Geometry */
+  --r-sm: 4px;
+  --r:    6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+
+  /* Elevation */
+  --e1: 0 1px 2px rgba(15,23,42,0.05);
+  --e2: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.04);
+  --e3: 0 4px 8px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
+  --e4: 0 8px 24px rgba(15,23,42,0.12), 0 2px 8px rgba(15,23,42,0.06);
+  --e5: 0 20px 48px rgba(15,23,42,0.15), 0 6px 16px rgba(15,23,42,0.08);
+}
+
+html { font-size: 14px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+}
+
+/* ── LAYOUT SHELL ── */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 50;
+  border-right: 1px solid rgba(255,255,255,0.04);
+}
+
+.sidebar-brand {
+  padding: 18px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.sidebar-brand-icon {
+  width: 30px; height: 30px;
+  background: var(--blue-600);
+  border-radius: var(--r-md);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-brand-icon svg { width: 16px; height: 16px; }
+.sidebar-brand-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
+}
+.sidebar-brand-sub {
+  font-size: 0.6875rem;
+  color: var(--gray-500);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.sidebar-section { padding: 12px 10px 4px; }
+.sidebar-section-label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+  padding: 0 6px;
+  margin-bottom: 4px;
+}
+.sidebar-nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 8px;
+  border-radius: var(--r);
+  color: var(--gray-400);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  text-decoration: none;
+  margin-bottom: 1px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.sidebar-nav-item:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.85); }
+.sidebar-nav-item.active { background: rgba(59,130,246,0.15); color: #fff; }
+.sidebar-nav-item .nav-icon { width: 16px; height: 16px; opacity: 0.7; flex-shrink: 0; }
+.sidebar-nav-item.active .nav-icon { opacity: 1; }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 12px 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px;
+  border-radius: var(--r);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.sidebar-user:hover { background: rgba(255,255,255,0.06); }
+.sidebar-user-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--blue-700);
+  color: #fff;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sidebar-user-info { flex: 1; min-width: 0; }
+.sidebar-user-name { font-size: 0.8125rem; font-weight: 500; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-role { font-size: 0.6875rem; color: var(--gray-500); }
+
+/* ── MAIN CONTENT ── */
+.main-content {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  height: 52px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+.topbar-left { display: flex; align-items: center; gap: 8px; }
+.topbar-breadcrumb {
+  font-size: 0.8125rem;
+  color: var(--text2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.topbar-breadcrumb .sep { color: var(--text3); }
+.topbar-breadcrumb .current { color: var(--text); font-weight: 500; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+/* ── PAGE ── */
+.page { padding: 24px; flex: 1; }
+.view { display: none; }
+.view.active { display: block; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.page-title { font-size: 1.125rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.page-sub { font-size: 0.8125rem; color: var(--text2); margin-top: 2px; }
+
+/* ── STAT CARDS ── */
+.stat-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  box-shadow: var(--e1);
+}
+.stat-card-label { font-size: 0.6875rem; font-weight: 500; color: var(--text3); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 6px; }
+.stat-card-value { font-size: 1.5rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; line-height: 1; }
+.stat-card-sub { font-size: 0.6875rem; color: var(--text3); margin-top: 4px; }
+
+/* ── TOOLBAR ── */
+.toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.toolbar-label { font-size: 0.75rem; font-weight: 500; color: var(--text3); white-space: nowrap; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text2);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.1s;
+  font-family: inherit;
+}
+.filter-chip:hover { border-color: var(--accent); color: var(--accent); }
+.filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.filter-chip .avatar-xs {
+  width: 14px; height: 14px; border-radius: 50%;
+  font-size: 7px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ── DATA TABLE ── */
+.data-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--e1);
+}
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead th {
+  background: var(--gray-50);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table tbody tr { border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.08s; }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover td { background: var(--gray-50); }
+.data-table tbody td { padding: 11px 14px; font-size: 0.8125rem; color: var(--text); vertical-align: middle; }
+.data-table .td-name { font-weight: 500; }
+.data-table .td-meta { color: var(--text2); font-size: 0.75rem; }
+.data-table .td-actions { text-align: right; }
+
+/* ── LEAD CARDS (grid mode) ── */
+.leads-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 12px; }
+
+.lead-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s, transform 0.15s;
+  position: relative;
+  box-shadow: var(--e1);
+}
+.lead-card:hover { border-color: var(--blue-200); box-shadow: var(--e3); transform: translateY(-1px); }
+.lead-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.lead-card-name { font-weight: 600; font-size: 0.9rem; color: var(--text); letter-spacing: -0.01em; }
+.lead-card-company { font-size: 0.75rem; color: var(--text2); margin-top: 2px; }
+.lead-card-menu { display: flex; gap: 4px; flex-shrink: 0; }
+.lead-card-divider { height: 1px; background: var(--border); margin: 10px 0; }
+.lead-card-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lead-card-row-label { font-size: 0.6875rem; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; }
+.lead-card-chips { display: flex; gap: 4px; flex-wrap: wrap; }
+
+/* ── BADGES & CHIPS ── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.6875rem; font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 20px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.badge-rep {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 0.6875rem; font-weight: 500;
+  padding: 2px 8px 2px 4px;
+  border-radius: 20px;
+  border: 1px solid;
+  margin-bottom: 8px;
+}
+.badge-rep .rep-dot { width: 14px; height: 14px; border-radius: 50%; font-size: 7px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+
+.chip { display: inline-flex; align-items: center; gap: 3px; font-size: 0.6875rem; font-weight: 500; padding: 2px 7px; border-radius: var(--r-sm); border: 1px solid; font-family: 'JetBrains Mono', monospace; }
+.chip-call          { background: var(--blue-50);   color: var(--blue-700);   border-color: var(--blue-200); }
+.chip-vm            { background: var(--amber-50);  color: var(--amber-700);  border-color: var(--amber-200); }
+.chip-ni            { background: var(--red-50);    color: var(--red-600);    border-color: var(--red-200); }
+.chip-cb            { background: var(--green-50);  color: var(--green-700);  border-color: var(--green-200); }
+.chip-interested    { background: var(--green-50);  color: var(--green-700);  border-color: var(--green-200); }
+.chip-paid-deposit  { background: var(--amber-50);  color: var(--amber-700);  border-color: var(--amber-200); }
+.chip-await-payment { background: var(--orange-50); color: var(--orange-600); border-color: var(--orange-200); }
+.chip-free-trial    { background: var(--blue-50);   color: var(--blue-700);   border-color: var(--blue-200); }
+.chip-paid-trial    { background: var(--purple-50); color: var(--purple-700); border-color: var(--purple-200); }
+.chip-already-reg   { background: var(--amber-100); color: var(--amber-700);  border-color: var(--amber-200); }
+.chip-fully-paid    { background: var(--green-100); color: var(--green-800);  border-color: var(--green-200); }
+.chip-will-register { background: var(--purple-50); color: var(--purple-700); border-color: var(--purple-200); }
+.chip-other         { background: var(--gray-100);  color: var(--gray-600);   border-color: var(--gray-300); }
+.chip-makeup-lesson { background: var(--pink-50);   color: var(--pink-600);   border-color: var(--pink-200); }
+
+/* ── EMPTY STATE ── */
+.empty-state { text-align: center; padding: 64px 20px; color: var(--text2); }
+.empty-state-icon { width: 40px; height: 40px; margin: 0 auto 12px; opacity: 0.25; }
+.empty-state-title { font-size: 0.9375rem; font-weight: 500; color: var(--text2); margin-bottom: 6px; }
+.empty-state-desc { font-size: 0.8125rem; color: var(--text3); margin-bottom: 20px; }
+
+/* ── DETAIL VIEW ── */
+.detail-shell { display: grid; grid-template-columns: 280px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 800px) { .detail-shell { grid-template-columns: 1fr; } }
+
+.detail-sidebar-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--e1);
+  position: sticky;
+  top: 76px;
+}
+.detail-sidebar-header {
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--border);
+  padding: 16px;
+}
+.detail-lead-name { font-size: 1rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+.detail-lead-meta { font-size: 0.75rem; color: var(--text2); margin-top: 3px; }
+.detail-sidebar-body { padding: 14px 16px; }
+.detail-field { margin-bottom: 12px; }
+.detail-field-label { font-size: 0.6875rem; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+.detail-field-value { font-size: 0.8125rem; color: var(--text); }
+
+.detail-main-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--e1);
+}
+
+/* ── TABS ── */
+.tabs-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 16px;
+  background: var(--surface);
+  gap: 0;
+}
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.8125rem;
+  padding: 12px 14px; color: var(--text3);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.12s;
+  letter-spacing: -0.01em;
+}
+.tab-btn:hover { color: var(--text2); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.tab-panel { display: none; padding: 20px; }
+.tab-panel.active { display: block; }
+
+/* ── DATE NAVIGATOR ── */
+.date-nav {
+  display: inline-flex; align-items: center; gap: 1px;
+  border: 1px solid var(--border); border-radius: var(--r-md);
+  overflow: hidden; background: var(--surface); box-shadow: var(--e1);
+}
+.date-nav-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text2); font-size: 0.875rem; padding: 5px 10px;
+  transition: all 0.1s; line-height: 1;
+}
+.date-nav-btn:hover { background: var(--gray-100); color: var(--text); }
+.date-nav-btn:disabled { opacity: 0.3; cursor: default; }
+.date-nav-label {
+  padding: 5px 12px; font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem; font-weight: 500; color: var(--text);
+  border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  min-width: 100px; text-align: center;
+}
+.today-pill {
+  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em;
+  text-transform: uppercase; background: var(--accent); color: #fff;
+  padding: 2px 6px; border-radius: 20px;
+}
+
+/* ── CALL BUTTON ── */
+.call-action-area { display: flex; justify-content: center; padding: 24px 0 20px; }
+.btn-call-main {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  width: 140px; padding: 20px 12px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r-lg); cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 8px rgba(37,99,235,0.35), 0 1px 3px rgba(37,99,235,0.2);
+  transition: all 0.15s;
+}
+.btn-call-main:hover { background: var(--accent-h); box-shadow: 0 4px 16px rgba(37,99,235,0.45), 0 2px 6px rgba(37,99,235,0.25); transform: translateY(-1px); }
+.btn-call-main:active { transform: translateY(0); box-shadow: 0 1px 4px rgba(37,99,235,0.35); }
+.btn-call-main.past { opacity: 0.4; cursor: not-allowed; }
+.btn-call-count { font-size: 2rem; font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+.btn-call-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; opacity: 0.85; }
+
+/* ── OUTCOME PICKER ── */
+.outcome-picker {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--gray-50);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  animation: slideIn 0.15s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } }
+.outcome-picker-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.outcome-picker-title { font-size: 0.75rem; font-weight: 600; color: var(--text2); letter-spacing: 0.02em; }
+.outcome-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; }
+.outcome-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 10px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 500;
+  color: var(--text2);
+  transition: all 0.1s; text-align: center; line-height: 1.3;
+}
+.outcome-btn:hover { border-color: var(--accent); background: var(--blue-50); color: var(--accent); }
+.outcome-btn-icon { font-size: 1.125rem; line-height: 1; }
+
+/* ── NOTE INPUT ── */
+.note-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.note-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 8px 12px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.8125rem;
+  outline: none; transition: all 0.12s;
+  box-shadow: var(--e1);
+}
+.note-input:focus { border-color: var(--blue-400, #60a5fa); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.note-input::placeholder { color: var(--text3); }
+
+/* ── LOG LIST ── */
+.section-heading { font-size: 0.6875rem; font-weight: 600; color: var(--text3); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 10px; }
+.log-list { display: flex; flex-direction: column; gap: 4px; max-height: 340px; overflow-y: auto; }
+.log-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: 0.8125rem;
+  animation: itemIn 0.15s ease;
+  box-shadow: var(--e1);
+}
+@keyframes itemIn { from { opacity: 0; transform: translateY(-2px); } }
+.log-indicator { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.log-indicator.call          { background: var(--blue-600); }
+.log-indicator.vm            { background: var(--amber-600); }
+.log-indicator.ni            { background: var(--red-600); }
+.log-indicator.cb            { background: var(--green-600); }
+.log-indicator.interested    { background: var(--green-600); }
+.log-indicator.paid-deposit  { background: var(--amber-600); }
+.log-indicator.await-payment { background: var(--orange-600); }
+.log-indicator.free-trial    { background: var(--blue-600); }
+.log-indicator.paid-trial    { background: var(--purple-600); }
+.log-indicator.already-reg   { background: var(--amber-600); }
+.log-indicator.fully-paid    { background: var(--green-800); }
+.log-indicator.will-register { background: var(--purple-700); }
+.log-indicator.other         { background: var(--gray-400); }
+.log-indicator.makeup-lesson { background: var(--pink-600); }
+.log-text { flex: 1; color: var(--text); }
+.log-note-text { color: var(--text2); font-style: italic; font-size: 0.75rem; }
+.log-time { font-family: 'JetBrains Mono', monospace; font-size: 0.6875rem; color: var(--text3); flex-shrink: 0; }
+.log-delete {
+  background: none; border: none; cursor: pointer;
+  color: var(--text3); font-size: 0.75rem; padding: 2px 5px;
+  border-radius: var(--r-sm); transition: all 0.1s; line-height: 1; margin-left: 2px;
+}
+.log-delete:hover { color: var(--red-600); background: var(--red-50); }
+.log-separator { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: none; border-radius: var(--r-md);
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  font-weight: 500; font-size: 0.8125rem;
+  transition: all 0.12s; letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #fff; padding: 7px 14px; box-shadow: var(--e1); }
+.btn-primary:hover { background: var(--accent-h); }
+.btn-secondary { background: var(--surface); color: var(--text); padding: 7px 14px; border: 1px solid var(--border2); box-shadow: var(--e1); }
+.btn-secondary:hover { background: var(--gray-50); border-color: var(--gray-400); }
+.btn-ghost-dark { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8); padding: 6px 12px; border: 1px solid rgba(255,255,255,0.1); font-size: 0.8125rem; }
+.btn-ghost-dark:hover { background: rgba(255,255,255,0.14); color: #fff; }
+.btn-danger-sm { background: transparent; color: var(--red-600); padding: 4px 8px; font-size: 0.75rem; border: 1px solid transparent; border-radius: var(--r-sm); }
+.btn-danger-sm:hover { background: var(--red-50); border-color: var(--red-200); }
+.btn-icon { padding: 6px; border-radius: var(--r); }
+.btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(15,23,42,0.55);
+  backdrop-filter: blur(2px);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: 24px;
+  width: 90%; max-width: 440px;
+  animation: modalIn 0.18s ease;
+  box-shadow: var(--e5);
+}
+@keyframes modalIn { from { transform: translateY(-8px) scale(0.98); opacity: 0; } }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-size: 0.9375rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+.modal-close { background: none; border: none; cursor: pointer; color: var(--text3); font-size: 1rem; padding: 2px 6px; border-radius: var(--r-sm); transition: all 0.1s; line-height: 1; }
+.modal-close:hover { background: var(--gray-100); color: var(--text); }
+.modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+.field { margin-bottom: 14px; }
+.field-label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+.field-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--r-md); padding: 8px 12px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.875rem;
+  outline: none; transition: all 0.12s;
+}
+.field-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.field-input::placeholder { color: var(--text3); }
+
+/* ── AUTH SCREENS ── */
+.auth-root {
+  position: fixed; inset: 0;
+  background: var(--gray-950);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+}
+.auth-panel {
+  display: flex;
+  width: 100%;
+  max-width: 900px;
+  min-height: 520px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--e5);
+  margin: 16px;
+}
+.auth-left {
+  flex: 1;
+  background: linear-gradient(160deg, #0f172a 0%, #1e3a5f 60%, #1e40af 100%);
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  min-width: 280px;
+}
+.auth-left::before {
+  content: '';
+  position: absolute;
+  bottom: -60px; right: -60px;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  background: rgba(59,130,246,0.12);
+  pointer-events: none;
+}
+.auth-left::after {
+  content: '';
+  position: absolute;
+  top: -40px; left: -40px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.03);
+  pointer-events: none;
+}
+.auth-brand { display: flex; align-items: center; gap: 10px; }
+.auth-brand-icon {
+  width: 34px; height: 34px; background: var(--blue-600);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+}
+.auth-brand-icon svg { width: 18px; height: 18px; }
+.auth-brand-name { font-size: 1rem; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+.auth-left-body { position: relative; z-index: 1; }
+.auth-left-headline { font-size: 1.5rem; font-weight: 600; color: #fff; letter-spacing: -0.03em; line-height: 1.3; margin-bottom: 12px; }
+.auth-left-sub { font-size: 0.875rem; color: rgba(255,255,255,0.5); line-height: 1.6; }
+.auth-left-features { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
+.auth-feature {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.8125rem; color: rgba(255,255,255,0.6);
+}
+.auth-feature-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue-400, #60a5fa); flex-shrink: 0; }
+
+.auth-right {
+  width: 420px;
+  background: var(--surface);
+  padding: 48px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.auth-step { display: none; }
+.auth-step.active { display: block; }
+.auth-step-title { font-size: 1.25rem; font-weight: 600; color: var(--text); letter-spacing: -0.02em; margin-bottom: 6px; }
+.auth-step-sub { font-size: 0.875rem; color: var(--text2); margin-bottom: 28px; line-height: 1.5; }
+.auth-step-sub strong { color: var(--text); font-weight: 500; }
+
+.auth-field { margin-bottom: 16px; }
+.auth-field-label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--text2); margin-bottom: 5px; }
+.auth-field-input {
+  width: 100%; background: var(--gray-50); border: 1px solid var(--border2);
+  border-radius: var(--r-md); padding: 10px 13px;
+  color: var(--text); font-family: 'Inter', sans-serif; font-size: 0.9375rem;
+  outline: none; transition: all 0.12s;
+}
+.auth-field-input:focus { border-color: var(--accent); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+.auth-field-input::placeholder { color: var(--text3); }
+.auth-field-input.error { border-color: var(--red-600); background: var(--red-50); }
+.auth-field-input.mono { font-family: 'JetBrains Mono', monospace; letter-spacing: 0.15em; font-size: 1.25rem; text-align: center; }
+
+.auth-btn {
+  width: 100%; padding: 11px;
+  font-size: 0.9375rem; font-weight: 600;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r-md); cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.12s;
+  box-shadow: 0 1px 3px rgba(37,99,235,0.35);
+  letter-spacing: -0.01em; margin-top: 8px;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.auth-btn:hover { background: var(--accent-h); }
+.auth-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.auth-btn-secondary {
+  width: 100%; padding: 10px;
+  font-size: 0.875rem; font-weight: 500;
+  background: none; color: var(--text2);
+  border: 1px solid var(--border2); border-radius: var(--r-md); cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all 0.12s;
+  margin-top: 8px;
+}
+.auth-btn-secondary:hover { background: var(--gray-50); color: var(--text); border-color: var(--gray-400); }
+
+.auth-error {
+  background: var(--red-50); border: 1px solid var(--red-200);
+  border-radius: var(--r-md); padding: 10px 13px;
+  font-size: 0.8125rem; color: var(--red-600);
+  margin-bottom: 14px; display: none;
+}
+.auth-error.visible { display: block; }
+
+.auth-info {
+  background: var(--blue-50); border: 1px solid var(--blue-200);
+  border-radius: var(--r-md); padding: 10px 13px;
+  font-size: 0.8125rem; color: var(--blue-700);
+  margin-bottom: 14px; display: none;
+  line-height: 1.5;
+}
+.auth-info.visible { display: block; }
+
+.auth-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 16px 0; color: var(--text3); font-size: 0.75rem;
+}
+.auth-divider::before, .auth-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.auth-link { color: var(--accent); font-weight: 500; cursor: pointer; font-size: 0.875rem; background: none; border: none; font-family: inherit; padding: 0; }
+.auth-link:hover { text-decoration: underline; }
+
+.auth-footer { text-align: center; margin-top: 20px; font-size: 0.8125rem; color: var(--text3); }
+
+.auth-spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Sidebar sign-out */
+.sidebar-signout {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 8px;
+  border-radius: var(--r);
+  font-size: 0.75rem; font-weight: 500;
+  color: var(--gray-500);
+  cursor: pointer; transition: all 0.1s;
+  background: none; border: none;
+  width: 100%; text-align: left; font-family: inherit;
+  margin-top: 4px;
+}
+.sidebar-signout:hover { background: rgba(239,68,68,0.1); color: #f87171; }
+
+/* ── HISTORY ── */
+@keyframes hgIn { from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none} }
+
+/* Paid banner */
+.hg-paid-hero {
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 60%, #22c55e 100%);
+  position: relative; overflow: hidden;
+  animation: hgIn 0.25s ease both;
+}
+.hg-paid-hero::after {
+  content: ''; position: absolute; right: -20px; top: -20px;
+  width: 120px; height: 120px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  pointer-events: none;
+}
+.hg-paid-hero-title {
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: rgba(255,255,255,0.55);
+  margin-bottom: 12px;
+}
+.hg-paid-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.hg-paid-chip {
+  flex: 1; min-width: 80px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: var(--r-md); padding: 10px 12px;
+}
+.hg-paid-chip-icon { font-size: 1rem; line-height: 1; }
+.hg-paid-chip-num {
+  font-size: 1.75rem; font-weight: 700; line-height: 1; color: #fff;
+  letter-spacing: -0.02em;
+}
+.hg-paid-chip-lbl { font-size: 0.5625rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255,255,255,0.6); text-align: center; }
+
+/* Sheet */
+.hg-sheet-wrap {
+  border: 1px solid var(--border); border-top: none;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+  overflow: hidden; box-shadow: var(--e2);
+  animation: hgIn 0.3s ease both;
+}
+.hg-sheet-wrap.standalone { border-radius: var(--r-lg); border-top: 1px solid var(--border); }
+.hg-sheet { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.hg-sheet thead th {
+  background: var(--gray-50);
+  font-size: 0.625rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--text3); padding: 9px 12px; text-align: center;
+  border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
+  white-space: nowrap;
+}
+.hg-sheet thead th:first-child { text-align: left; min-width: 120px; border-right: 2px solid var(--border2); }
+.hg-sheet thead th:last-child { border-right: none; }
+.hg-sheet thead th.th-paid { background: var(--green-50); color: var(--green-700); }
+.hg-th-icon { display: block; font-size: 0.875rem; line-height: 1; margin-bottom: 2px; }
+.hg-sheet tbody tr:nth-child(even) td { background: var(--gray-50); }
+.hg-sheet tbody tr:nth-child(odd) td { background: var(--surface); }
+.hg-sheet tbody tr:hover td { background: var(--blue-50) !important; }
+.hg-sheet tbody tr.hg-today-row td { background: var(--green-50) !important; }
+.hg-sheet tbody tr.hg-today-row:hover td { background: var(--green-100) !important; }
+.hg-sheet tbody td {
+  padding: 8px 12px; text-align: center;
+  border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace; color: var(--text3); font-size: 0.8125rem;
+  vertical-align: middle;
+}
+.hg-sheet tbody td:first-child {
+  text-align: left; font-weight: 500; color: var(--text);
+  border-right: 2px solid var(--border2); font-family: 'Inter', sans-serif; font-size: 0.8125rem;
+}
+.hg-sheet tbody td:last-child { border-right: none; }
+.hg-sheet tbody tr:last-child td { border-bottom: none; }
+.hg-cell { display: inline-block; min-width: 20px; }
+.hg-cell.v { font-weight: 600; color: var(--text); }
+.hg-cell.v-paid {
+  font-weight: 700; color: var(--green-800);
+  background: var(--green-100); border-radius: var(--r-sm);
+  padding: 1px 6px; border: 1px solid var(--green-200); font-size: 0.8125rem;
+}
+.hg-date-cell { display: flex; align-items: center; gap: 6px; }
+.hg-today-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.hg-today-label {
+  font-size: 0.5625rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  background: var(--accent); color: #fff; border-radius: var(--r-sm); padding: 1px 5px;
+  font-family: 'Inter', sans-serif;
+}
+.hg-calls-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 600;
+  background: var(--blue-50); color: var(--blue-700); border: 1px solid var(--blue-200);
+  border-radius: var(--r-sm); padding: 0 6px; line-height: 18px; display: inline-block;
+  margin-left: auto;
+}
+.hg-sheet tfoot td {
+  padding: 9px 12px; background: var(--gray-50) !important;
+  border-top: 2px solid var(--border2); font-weight: 600;
+  color: var(--text2); text-align: center;
+  border-right: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem;
+}
+.hg-sheet tfoot td:first-child { text-align: left; font-family: 'Inter', sans-serif; font-size: 0.75rem; font-weight: 600; color: var(--text3); letter-spacing: 0.02em; border-right: 2px solid var(--border2); }
+.hg-sheet tfoot td:last-child { border-right: none; }
+.hg-sheet tfoot td.td-paid-total { color: var(--green-800); font-weight: 700; }
+
+/* ── MISC ── */
+.divider { border: none; border-top: 1px solid var(--border); margin: 4px 0 16px; }
+.back-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--text2); font-size: 0.8125rem; cursor: pointer;
+  margin-bottom: 16px; background: none; border: none;
+  font-family: 'Inter', sans-serif; font-weight: 400;
+  transition: color 0.1s; padding: 0;
+}
+.back-btn:hover { color: var(--text); }
+.back-btn svg { width: 14px; height: 14px; }
+
+.rep-select {
+  border: 1px solid var(--border2); border-radius: var(--r); padding: 4px 8px;
+  font-family: 'Inter', sans-serif; font-size: 0.8125rem; font-weight: 400;
+  color: var(--text); background: var(--surface2); cursor: pointer; outline: none;
+}
+.rep-select:focus { border-color: var(--accent); }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(37,99,235,0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(37,99,235,0); }
+  100% { box-shadow: 0 0 0 0 rgba(37,99,235,0); }
+}
+.btn-call-main.pulse { animation: pulse-ring 0.4s ease; }
+
+</style>
+</head>
+<body>
+
+<!-- AUTH ROOT -->
+<div class="auth-root" id="auth-root" style="display:none">
+  <div class="auth-panel">
+
+    <!-- Left branding -->
+    <div class="auth-left">
+      <div class="auth-brand">
+        <div class="auth-brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+        </div>
+        <span class="auth-brand-name">LeadTrack</span>
+      </div>
+      <div class="auth-left-body">
+        <div class="auth-left-headline">Sales intelligence<br>for high-performing teams.</div>
+        <div class="auth-left-sub">Track every call, every outcome, every rep — in one place.</div>
+        <div class="auth-left-features">
+          <div class="auth-feature"><span class="auth-feature-dot"></span>Real-time call logging</div>
+          <div class="auth-feature"><span class="auth-feature-dot"></span>Per-rep performance history</div>
+          <div class="auth-feature"><span class="auth-feature-dot"></span>Revenue outcome tracking</div>
+          <div class="auth-feature"><span class="auth-feature-dot"></span>Daily office reports</div>
+        </div>
+      </div>
+      <div style="font-size:0.6875rem;color:rgba(255,255,255,0.2);position:relative;z-index:1">© LeadTrack · Enterprise Edition</div>
+    </div>
+
+    <!-- Right auth form -->
+    <div class="auth-right">
+
+      <!-- LOGIN -->
+      <div class="auth-step active" id="auth-step-login">
+        <div class="auth-step-title">Welcome back</div>
+        <div class="auth-step-sub">Sign in to your LeadTrack workspace.</div>
+        <div id="auth-login-error" class="auth-error"></div>
+        <div class="auth-field">
+          <label class="auth-field-label">Username</label>
+          <input class="auth-field-input" id="auth-login-username" type="text" placeholder="Enter your username"
+            autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('auth-login-password').focus()">
+        </div>
+        <div class="auth-field">
+          <label class="auth-field-label">Password</label>
+          <div style="position:relative">
+            <input class="auth-field-input" id="auth-login-password" type="password" placeholder="Enter your password"
+              autocomplete="current-password" onkeydown="if(event.key==='Enter')authLogin()" style="padding-right:38px">
+            <button onclick="authTogglePassword('auth-login-password',this)" tabindex="-1"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;line-height:1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <button class="auth-btn" onclick="authLogin()" id="auth-login-btn">Sign In</button>
+        <div class="auth-divider">or</div>
+        <button class="auth-btn-secondary" onclick="authShowStep('register')">Create an account</button>
+      </div>
+
+      <!-- REGISTER -->
+      <div class="auth-step" id="auth-step-register">
+        <div class="auth-step-title">Create account</div>
+        <div class="auth-step-sub">Set up your LeadTrack profile. Your username must be unique.</div>
+        <div id="auth-register-error" class="auth-error"></div>
+        <div class="auth-field">
+          <label class="auth-field-label">Full name</label>
+          <input class="auth-field-input" id="auth-reg-name" type="text" placeholder="Jane Smith"
+            autocomplete="name" onkeydown="if(event.key==='Enter')document.getElementById('auth-reg-username').focus()">
+        </div>
+        <div class="auth-field">
+          <label class="auth-field-label">Username</label>
+          <input class="auth-field-input" id="auth-reg-username" type="text" placeholder="janesmith"
+            autocomplete="username"
+            oninput="this.value=this.value.replace(/[^a-zA-Z0-9_.]/g,'')"
+            onkeydown="if(event.key==='Enter')document.getElementById('auth-reg-password').focus()">
+          <div style="font-size:0.6875rem;color:var(--text3);margin-top:4px">Letters, numbers, underscores and dots only.</div>
+        </div>
+        <div class="auth-field">
+          <label class="auth-field-label">Password</label>
+          <div style="position:relative">
+            <input class="auth-field-input" id="auth-reg-password" type="password" placeholder="At least 6 characters"
+              autocomplete="new-password" onkeydown="if(event.key==='Enter')document.getElementById('auth-reg-confirm').focus()" style="padding-right:38px">
+            <button onclick="authTogglePassword('auth-reg-password',this)" tabindex="-1"
+              style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);padding:2px;line-height:1">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <!-- Password strength bar -->
+          <div style="margin-top:6px;height:3px;border-radius:4px;background:var(--border);overflow:hidden">
+            <div id="auth-pw-strength-bar" style="height:100%;width:0%;transition:width 0.2s,background 0.2s;border-radius:4px"></div>
+          </div>
+          <div id="auth-pw-strength-label" style="font-size:0.625rem;color:var(--text3);margin-top:3px"></div>
+        </div>
+        <div class="auth-field">
+          <label class="auth-field-label">Confirm password</label>
+          <input class="auth-field-input" id="auth-reg-confirm" type="password" placeholder="Re-enter password"
+            autocomplete="new-password" onkeydown="if(event.key==='Enter')authRegister()">
+        </div>
+        <button class="auth-btn" onclick="authRegister()" id="auth-register-btn">Create Account</button>
+        <div class="auth-divider">or</div>
+        <button class="auth-btn-secondary" onclick="authShowStep('login')">Already have an account? Sign in</button>
+      </div>
+
+      <!-- SUCCESS -->
+      <div class="auth-step" id="auth-step-success">
+        <div style="text-align:center;padding:20px 0">
+          <div style="width:52px;height:52px;border-radius:50%;background:var(--green-50);border:1px solid var(--green-200);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--green-700)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="auth-step-title">Signed in</div>
+          <div class="auth-step-sub" id="auth-success-msg">Loading your workspace…</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div class="app-shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand" onclick="showDashboard()">
+      <div class="sidebar-brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div>
+        <div class="sidebar-brand-name">LeadTrack</div>
+        <div class="sidebar-brand-sub">Sales Intelligence</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Workspace</div>
+      <button class="sidebar-nav-item active" onclick="showDashboard()">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        All Leads
+      </button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Tools</div>
+      <button class="sidebar-nav-item" onclick="openManageRepsModal()">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Manage Reps
+      </button>
+      <button class="sidebar-nav-item" onclick="openOfficeReport()">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+        </svg>
+        Office Report
+      </button>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user" onclick="openChangeNameModal()">
+        <div class="sidebar-user-avatar" id="header-avatar">?</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name" id="header-name">—</div>
+          <div class="sidebar-user-role" id="header-email-display" style="font-size:0.6rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+        </div>
+      </div>
+      <button class="sidebar-signout" onclick="authSignOut()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-breadcrumb">
+          <span>LeadTrack</span>
+          <span class="sep">/</span>
+          <span class="current" id="topbar-page">Dashboard</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:0.6875rem;color:var(--text3)" id="header-date"></span>
+        <button class="btn btn-primary" onclick="openNewLeadModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Lead
+        </button>
+      </div>
+    </header>
+
+    <!-- PAGE -->
+    <div class="page">
+
+      <!-- DASHBOARD -->
+      <div id="view-dashboard" class="view active">
+        <div class="page-header">
+          <div>
+            <div class="page-title">All Leads</div>
+            <div class="page-sub">Track and manage your sales pipeline</div>
+          </div>
+        </div>
+
+        <!-- Today summary -->
+        <div id="summary-stats-row" style="margin-bottom:20px"></div>
+
+        <!-- Filter toolbar -->
+        <div class="toolbar">
+          <span class="toolbar-label">Filter by rep</span>
+          <button class="filter-chip active" data-rep="all" onclick="setFilter('all')">Everyone</button>
+          <div id="rep-filter-btns" style="display:contents"></div>
+        </div>
+
+        <div id="leads-grid" class="leads-grid"></div>
+      </div>
+
+      <!-- LEAD DETAIL -->
+      <div id="view-detail" class="view">
+        <button class="back-btn" onclick="showDashboard()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          Back to All Leads
+        </button>
+
+        <div class="detail-shell">
+          <!-- Left sidebar info -->
+          <div class="detail-sidebar-card">
+            <div class="detail-sidebar-header">
+              <div class="detail-lead-name" id="detail-name"></div>
+              <div class="detail-lead-meta" id="detail-meta"></div>
+            </div>
+            <div class="detail-sidebar-body">
+              <div class="detail-field">
+                <div class="detail-field-label">Assigned Rep</div>
+                <select class="rep-select" id="detail-rep-select" onchange="reassignLead(this.value)" style="width:100%;margin-top:4px"></select>
+              </div>
+              <div class="detail-field" id="detail-date-nav-wrap">
+                <div class="detail-field-label">Viewing Date</div>
+                <div style="margin-top:6px">
+                  <div class="date-nav">
+                    <button class="date-nav-btn" id="nav-prev" onclick="changeDay(-1)">‹</button>
+                    <span class="date-nav-label" id="nav-label"></span>
+                    <button class="date-nav-btn" id="nav-next" onclick="changeDay(1)">›</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right main panel -->
+          <div class="detail-main-card">
+            <div class="tabs-bar">
+              <button class="tab-btn active" onclick="switchTab('activity')">Activity</button>
+              <button class="tab-btn" onclick="switchTab('history')">History</button>
+            </div>
+
+            <div class="tab-panel active" id="tab-activity">
+              <!-- Outcome picker -->
+              <div id="call-outcome-panel" style="display:none" class="outcome-picker">
+                <div class="outcome-picker-header">
+                  <span class="outcome-picker-title">Select call outcome</span>
+                  <button onclick="cancelCallOutcome()" class="btn-icon btn" style="color:var(--text3);font-size:0.875rem;padding:3px 7px">✕</button>
+                </div>
+                <div id="call-outcome-grid" class="outcome-grid"></div>
+              </div>
+
+              <div class="call-action-area">
+                <button class="btn-call-main" onclick="startCall()" id="btn-call">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.09 6.09l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span class="btn-call-count" id="count-call">0</span>
+                  <span class="btn-call-label">Log Call</span>
+                </button>
+              </div>
+
+              <div class="divider"></div>
+
+              <div class="note-row">
+                <input class="note-input" id="note-input" type="text" placeholder="Add a note to attach to your next log entry…">
+              </div>
+
+              <div class="section-heading">Call log — <span id="log-date-label"></span></div>
+              <div id="log-list" class="log-list"></div>
+            </div>
+
+            <div class="tab-panel" id="tab-history">
+              <div id="history-graphic-container"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page -->
+  </div><!-- /main-content -->
+</div><!-- /app-shell -->
+
+<!-- NEW LEAD MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">New Lead</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="field"><label class="field-label">Lead Name <span style="color:var(--red-600)">*</span></label><input class="field-input" id="inp-name" type="text" placeholder="e.g. Jane Smith" onkeydown="if(event.key==='Enter')document.getElementById('inp-rep').focus()"></div>
+    <div class="field"><label class="field-label">Assigned Rep</label><select class="field-input" id="inp-rep"></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createLead()">Create Lead</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE NAME MODAL -->
+<div class="modal-overlay" id="name-modal" onclick="closeNameModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Edit Profile</div>
+      <button class="modal-close" onclick="closeNameModal()">✕</button>
+    </div>
+    <div class="field"><label class="field-label">Display Name</label><input class="field-input" id="change-name-input" type="text" placeholder="Your name" onkeydown="if(event.key==='Enter')saveChangeName()"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeNameModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveChangeName()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- OFFICE REPORT MODAL -->
+<div class="modal-overlay" id="report-modal" onclick="closeOfficeReport(event)">
+  <div class="modal" style="max-width:580px;width:95%">
+    <div class="modal-header">
+      <div class="modal-title">Office Report</div>
+      <button class="modal-close" onclick="closeOfficeReport()">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;flex-wrap:wrap">
+      <div>
+        <div class="field-label" style="margin-bottom:4px">Date</div>
+        <input type="date" id="report-date" class="field-input" style="width:auto" onchange="buildReport()">
+      </div>
+      <div>
+        <div class="field-label" style="margin-bottom:4px">Rep</div>
+        <select id="report-rep" class="field-input" style="width:auto" onchange="buildReport()"></select>
+      </div>
+    </div>
+    <div id="report-preview" style="background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r-md);padding:16px;font-family:'JetBrains Mono',monospace;font-size:0.75rem;line-height:1.9;white-space:pre-wrap;max-height:360px;overflow-y:auto;color:var(--text)"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeOfficeReport()">Close</button>
+      <button class="btn btn-primary" id="copy-report-btn" onclick="copyReport()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- MANAGE REPS MODAL -->
+<div class="modal-overlay" id="reps-modal" onclick="closeManageRepsModal(event)">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">Manage Reps</div>
+      <button class="modal-close" onclick="closeManageRepsModal()">✕</button>
+    </div>
+    <div id="reps-list" style="margin-bottom:16px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow-y:auto"></div>
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div class="field-label" style="margin-bottom:6px">Add New Rep</div>
+      <div style="display:flex;gap:8px">
+        <input id="new-rep-input" type="text" placeholder="Full name…" maxlength="40" class="field-input"
+          onkeydown="if(event.key==='Enter')addNewRep()">
+        <button class="btn btn-primary" onclick="addNewRep()">Add</button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeManageRepsModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ALL_TYPES = ['call','vm','ni','cb','interested','will-register','paid-deposit','await-payment','free-trial','paid-trial','already-reg','fully-paid','other','makeup-lesson'];
+const TYPE_ICONS = { call:'📞', vm:'📬', ni:'🚫', cb:'🔁', interested:'🙌', 'will-register':'📝', 'paid-deposit':'💵', 'await-payment':'⏳', 'free-trial':'🆓', 'paid-trial':'🧪', 'already-reg':'🔖', 'fully-paid':'✅', 'other':'💬', 'makeup-lesson':'🎨' };
+const LOG_LABELS = { call:'Call', vm:'Voicemail', ni:'Not Interested', cb:'Callback', interested:'Interested', 'will-register':'Will Register', 'paid-deposit':'Paid Deposit', 'await-payment':'Awaiting Payment', 'free-trial':'Free Trial', 'paid-trial':'Paid Trial', 'already-reg':'Already Registered', 'fully-paid':'Fully Paid', 'other':'Other', 'makeup-lesson':'Makeup Lesson' };
+
+const REP_COLORS = [
+  { bg:'#eff6ff', text:'#1d4ed8', border:'#bfdbfe' },
+  { bg:'#fdf2f8', text:'#db2777', border:'#fbcfe8' },
+  { bg:'#f0fdf4', text:'#15803d', border:'#bbf7d0' },
+  { bg:'#fffbeb', text:'#b45309', border:'#fde68a' },
+  { bg:'#faf5ff', text:'#7e22ce', border:'#e9d5ff' },
+  { bg:'#fff7ed', text:'#ea580c', border:'#fed7aa' },
+  { bg:'#f0fdfa', text:'#0f766e', border:'#99f6e4' },
+  { bg:'#fdf4ff', text:'#86198f', border:'#f0abfc' },
+];
+
+let leads     = JSON.parse(localStorage.getItem('leads_v2') || '[]');
+let reps      = JSON.parse(localStorage.getItem('reps')     || '[]');
+let myName    = localStorage.getItem('myName') || '';
+let filterRep = 'all';
+let currentLeadId = null;
+let viewingDate   = todayKey();
+
+function save() { localStorage.setItem('leads_v2', JSON.stringify(leads)); localStorage.setItem('reps', JSON.stringify(reps)); }
+function getLead(id) { return leads.find(l => l.id === id); }
+function getRep(id)  { return reps.find(r => r.id === id); }
+
+function todayKey() { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function formatDateLabel(dk) {
+  const [y,m,d] = dk.split('-').map(Number);
+  const date = new Date(y,m-1,d);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff = Math.round((date-today)/86400000);
+  if (diff===0) return 'Today';
+  if (diff===-1) return 'Yesterday';
+  return date.toLocaleDateString([],{month:'short',day:'numeric',year:'numeric'});
+}
+function emptyDayStats() { return Object.fromEntries(ALL_TYPES.map(t=>[t,0])); }
+function getDayStats(lead,dk) { return (lead.days&&lead.days[dk])?lead.days[dk]:emptyDayStats(); }
+function getDayLog(lead,dk)   { return (lead.dayLogs&&lead.dayLogs[dk])?lead.dayLogs[dk]:[]; }
+
+function repColor(repId) { const idx=reps.findIndex(r=>r.id===repId); return REP_COLORS[idx%REP_COLORS.length]||REP_COLORS[0]; }
+function repInitials(name) { if(!name)return'?'; return name.trim().split(/\s+/).map(w=>w[0].toUpperCase()).slice(0,2).join(''); }
+function ensureRep(name) {
+  name=name.trim(); if(!name)return null;
+  let rep=reps.find(r=>r.name.toLowerCase()===name.toLowerCase());
+  if(!rep){rep={id:'rep_'+Date.now()+'_'+Math.random().toString(36).slice(2,6),name};reps.push(rep);save();}
+  return rep;
+}
+
+// ── AUTH SYSTEM (username + password, SHA-256 hashed) ──
+let authSession = null;
+
+function authGetUsers()        { return JSON.parse(localStorage.getItem('lt_users') || '[]'); }
+function authSaveUsers(u)      { localStorage.setItem('lt_users', JSON.stringify(u)); }
+function authGetSession()      { return JSON.parse(localStorage.getItem('lt_session') || 'null'); }
+function authSaveSession(s)    { localStorage.setItem('lt_session', JSON.stringify(s)); }
+function authClearSession()    { localStorage.removeItem('lt_session'); }
+function authGenerateToken()   { return Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b=>b.toString(16).padStart(2,'0')).join(''); }
+
+async function hashPassword(password, salt) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(salt + password);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+function generateSalt() {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function authSetError(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.toggle('visible', !!msg);
+}
+
+function authShowStep(step) {
+  ['login','register','success'].forEach(s => {
+    const el = document.getElementById('auth-step-'+s);
+    if (el) el.classList.toggle('active', s === step);
+  });
+  // Focus first input of active step
+  setTimeout(() => {
+    const active = document.querySelector('.auth-step.active .auth-field-input');
+    if (active) active.focus();
+  }, 60);
+}
+
+function authTogglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.style.color = isHidden ? 'var(--accent)' : 'var(--text3)';
+}
+
+function checkSetup() {
+  const session = authGetSession();
+  if (session && session.expiresAt > Date.now()) {
+    authSession = session;
+    myName = session.name;
+    updateHeaderRep();
+    renderDashboard();
+  } else {
+    authClearSession();
+    showAuthScreen();
+  }
+}
+
+function showAuthScreen() {
+  document.getElementById('auth-root').style.display = 'flex';
+  authShowStep('login');
+}
+function hideAuthScreen() {
+  document.getElementById('auth-root').style.display = 'none';
+}
+
+// Password strength checker
+document.addEventListener('DOMContentLoaded', () => {
+  const pwInput = document.getElementById('auth-reg-password');
+  if (pwInput) {
+    pwInput.addEventListener('input', () => {
+      const pw = pwInput.value;
+      const bar = document.getElementById('auth-pw-strength-bar');
+      const lbl = document.getElementById('auth-pw-strength-label');
+      if (!pw) { bar.style.width='0%'; lbl.textContent=''; return; }
+      let score = 0;
+      if (pw.length >= 6)  score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^a-zA-Z0-9]/.test(pw)) score++;
+      const levels = [
+        { w:'20%', bg:'var(--red-600)',   label:'Very weak' },
+        { w:'40%', bg:'var(--orange-600)',label:'Weak' },
+        { w:'60%', bg:'var(--amber-600)', label:'Fair' },
+        { w:'80%', bg:'var(--blue-600)',  label:'Strong' },
+        { w:'100%',bg:'var(--green-700)', label:'Very strong' },
+      ];
+      const lvl = levels[Math.min(score-1, 4)] || levels[0];
+      bar.style.width = lvl.w;
+      bar.style.background = lvl.bg;
+      lbl.textContent = lvl.label;
+      lbl.style.color = lvl.bg;
+    });
+  }
+});
+
+async function authLogin() {
+  const username = document.getElementById('auth-login-username').value.trim().toLowerCase();
+  const password = document.getElementById('auth-login-password').value;
+  authSetError('auth-login-error', '');
+
+  if (!username || !password) {
+    authSetError('auth-login-error', 'Please enter your username and password.');
+    return;
+  }
+
+  const btn = document.getElementById('auth-login-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="auth-spinner"></span> Signing in…';
+
+  try {
+    const users = authGetUsers();
+    const user = users.find(u => u.username === username);
+    if (!user) {
+      authSetError('auth-login-error', 'No account found with that username.');
+      return;
+    }
+
+    const hash = await hashPassword(password, user.salt);
+    if (hash !== user.passwordHash) {
+      authSetError('auth-login-error', 'Incorrect password. Please try again.');
+      document.getElementById('auth-login-password').value = '';
+      document.getElementById('auth-login-password').focus();
+      return;
+    }
+
+    // Success — create session
+    const session = {
+      username: user.username,
+      name: user.name,
+      token: authGenerateToken(),
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
+    };
+    authSaveSession(session);
+    authSession = session;
+    myName = user.name;
+    localStorage.setItem('myName', myName);
+    ensureRep(myName);
+
+    document.getElementById('auth-success-msg').textContent =
+      `Welcome back, ${user.name.split(' ')[0]}. Loading your workspace…`;
+    authShowStep('success');
+    setTimeout(() => { hideAuthScreen(); updateHeaderRep(); renderDashboard(); }, 900);
+
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In';
+  }
+}
+
+async function authRegister() {
+  const name     = document.getElementById('auth-reg-name').value.trim();
+  const username = document.getElementById('auth-reg-username').value.trim().toLowerCase();
+  const password = document.getElementById('auth-reg-password').value;
+  const confirm  = document.getElementById('auth-reg-confirm').value;
+  authSetError('auth-register-error', '');
+
+  // Validate
+  if (!name)     { authSetError('auth-register-error', 'Please enter your full name.'); document.getElementById('auth-reg-name').focus(); return; }
+  if (!username) { authSetError('auth-register-error', 'Please choose a username.'); document.getElementById('auth-reg-username').focus(); return; }
+  if (username.length < 3) { authSetError('auth-register-error', 'Username must be at least 3 characters.'); return; }
+  if (!/^[a-z0-9_.]+$/.test(username)) { authSetError('auth-register-error', 'Username may only contain letters, numbers, underscores, and dots.'); return; }
+  if (password.length < 6) { authSetError('auth-register-error', 'Password must be at least 6 characters.'); document.getElementById('auth-reg-password').focus(); return; }
+  if (password !== confirm)  { authSetError('auth-register-error', 'Passwords do not match.'); document.getElementById('auth-reg-confirm').focus(); return; }
+
+  const users = authGetUsers();
+  if (users.find(u => u.username === username)) {
+    authSetError('auth-register-error', 'That username is already taken. Please choose another.');
+    document.getElementById('auth-reg-username').focus();
+    return;
+  }
+
+  const btn = document.getElementById('auth-register-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="auth-spinner"></span> Creating account…';
+
+  try {
+    const salt = generateSalt();
+    const passwordHash = await hashPassword(password, salt);
+    const user = { username, name, salt, passwordHash, createdAt: new Date().toISOString() };
+    users.push(user);
+    authSaveUsers(users);
+
+    // Auto sign in
+    const session = {
+      username: user.username,
+      name: user.name,
+      token: authGenerateToken(),
+      expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000
+    };
+    authSaveSession(session);
+    authSession = session;
+    myName = user.name;
+    localStorage.setItem('myName', myName);
+    ensureRep(myName);
+
+    document.getElementById('auth-success-msg').textContent =
+      `Account created. Welcome, ${user.name.split(' ')[0]}!`;
+    authShowStep('success');
+    setTimeout(() => { hideAuthScreen(); updateHeaderRep(); renderDashboard(); }, 900);
+
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Create Account';
+  }
+}
+
+function authSignOut() {
+  authClearSession();
+  localStorage.removeItem('myName');
+  authSession = null;
+  myName = '';
+  showAuthScreen();
+}
+
+function updateHeaderRep() {
+  document.getElementById('header-name').textContent = myName || '—';
+  document.getElementById('header-avatar').textContent = repInitials(myName);
+  const emailEl = document.getElementById('header-email-display');
+  if (emailEl && authSession) emailEl.textContent = '@' + (authSession.username || '');
+}
+function openChangeNameModal() {
+  document.getElementById('change-name-input').value=myName;
+  document.getElementById('name-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('change-name-input').focus(),50);
+}
+function closeNameModal(event) {
+  if(event&&event.target!==document.getElementById('name-modal'))return;
+  document.getElementById('name-modal').classList.remove('open');
+}
+function saveChangeName() {
+  const val=document.getElementById('change-name-input').value.trim();
+  if(!val)return;
+  myName=val; localStorage.setItem('myName',myName); ensureRep(myName);
+  if(authSession){authSession.name=myName;authSaveSession(authSession);}
+  document.getElementById('name-modal').classList.remove('open');
+  updateHeaderRep(); renderDashboard();
+}
+function updateHeaderDate() {
+  document.getElementById('header-date').textContent=
+    new Date().toLocaleDateString([],{weekday:'short',month:'short',day:'numeric',year:'numeric'});
+}
+
+function setFilter(repId) {
+  filterRep=repId;
+  document.querySelectorAll('.filter-chip').forEach(b=>b.classList.toggle('active',b.dataset.rep===repId));
+  renderSummary(); renderLeadsGrid();
+}
+function renderFilterBar() {
+  document.getElementById('rep-filter-btns').innerHTML=reps.map(r=>{
+    const c=repColor(r.id);
+    return `<button class="filter-chip ${filterRep===r.id?'active':''}" data-rep="${r.id}" onclick="setFilter('${r.id}')"
+      style="${filterRep===r.id?'':`color:${c.text};border-color:${c.border}`}">
+      <span class="avatar-xs" style="background:${c.text};color:#fff">${esc(repInitials(r.name))}</span>
+      ${esc(r.name)}</button>`;
+  }).join('');
+}
+function renderSummary() {
+  const today=todayKey();
+  const totals=emptyDayStats();
+  const filtered=filterRep==='all'?leads:leads.filter(l=>l.repId===filterRep);
+  filtered.forEach(lead=>{const ds=getDayStats(lead,today);ALL_TYPES.forEach(t=>{totals[t]+=ds[t]||0;});});
+  const totalCalls=totals['call']||0;
+  const totalLeads=filtered.length;
+  const paidTypes=['paid-deposit','fully-paid','paid-trial','interested','will-register','await-payment'];
+  const totalPaid=paidTypes.reduce((s,t)=>s+(totals[t]||0),0);
+  const totalVM=totals['vm']||0;
+  const repName=filterRep==='all'?'All Reps':(getRep(filterRep)?.name||'');
+
+  // build chip summary
+  const chips=ALL_TYPES.filter(t=>totals[t]>0).map(t=>`<span class="chip chip-${t}">${TYPE_ICONS[t]} ${totals[t]}</span>`).join('');
+
+  document.getElementById('summary-stats-row').innerHTML=`
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-card-label">Total Calls Today</div>
+        <div class="stat-card-value">${totalCalls}</div>
+        <div class="stat-card-sub">${repName}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Paid Outcomes</div>
+        <div class="stat-card-value" style="color:var(--green-700)">${totalPaid}</div>
+        <div class="stat-card-sub">Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Voicemails</div>
+        <div class="stat-card-value">${totalVM}</div>
+        <div class="stat-card-sub">Today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Active Leads</div>
+        <div class="stat-card-value">${totalLeads}</div>
+        <div class="stat-card-sub">${repName}</div>
+      </div>
+    </div>
+    ${chips?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px">${chips}</div>`:''}`;
+}
+
+function renderDashboard() {
+  updateHeaderDate(); updateHeaderRep(); renderFilterBar(); renderSummary(); renderLeadsGrid();
+}
+function renderLeadsGrid() {
+  const today=todayKey();
+  const grid=document.getElementById('leads-grid');
+  const filtered=filterRep==='all'?leads:leads.filter(l=>l.repId===filterRep);
+  if(!filtered.length){
+    grid.innerHTML=leads.length===0
+      ?`<div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state-title">No leads yet</div>
+          <div class="empty-state-desc">Create your first lead to get started.</div>
+          <button class="btn btn-primary" onclick="openNewLeadModal()">Create Lead</button>
+        </div>`
+      :`<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-title">No leads for this rep</div></div>`;
+    return;
+  }
+  grid.innerHTML=filtered.map(lead=>{
+    const ds=getDayStats(lead,today);
+    const chips=ALL_TYPES.filter(t=>ds[t]>0).map(t=>`<span class="chip chip-${t}">${TYPE_ICONS[t]} ${ds[t]}</span>`).join('');
+    const rep=lead.repId?getRep(lead.repId):null;
+    const repBadge=rep?(()=>{const c=repColor(rep.id);return`<span class="badge-rep" style="background:${c.bg};color:${c.text};border-color:${c.border}"><span class="rep-dot" style="background:${c.text};color:#fff">${esc(repInitials(rep.name))}</span>${esc(rep.name)}</span>`;})():'';
+    return`<div class="lead-card" onclick="openLead('${lead.id}')">
+      <div class="lead-card-header">
+        <div>
+          <div class="lead-card-name">${esc(lead.name)}</div>
+          <div class="lead-card-company">${esc(lead.company||lead.phone||'No contact info')}</div>
+        </div>
+        <div class="lead-card-menu">
+          <button class="btn btn-danger-sm" onclick="event.stopPropagation();deleteLead('${lead.id}')" title="Delete">✕</button>
+        </div>
+      </div>
+      ${repBadge}
+      <div class="lead-card-divider"></div>
+      <div class="lead-card-row">
+        <span class="lead-card-row-label">Today</span>
+        <div class="lead-card-chips">${chips||'<span style="color:var(--text3);font-size:0.75rem">No activity</span>'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function showDashboard() {
+  document.getElementById('view-dashboard').classList.add('active');
+  document.getElementById('view-detail').classList.remove('active');
+  document.getElementById('topbar-page').textContent='Dashboard';
+  currentLeadId=null; renderDashboard();
+}
+function openLead(id) {
+  currentLeadId=id; viewingDate=todayKey();
+  document.getElementById('view-dashboard').classList.remove('active');
+  document.getElementById('view-detail').classList.add('active');
+  const lead=getLead(id);
+  document.getElementById('topbar-page').textContent=lead?lead.name:'Lead';
+  switchTab('activity'); renderDetail(lead);
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['activity','history'][i]===tab));
+  document.getElementById('tab-activity').classList.toggle('active',tab==='activity');
+  document.getElementById('tab-history').classList.toggle('active',tab==='history');
+  if(tab==='history')renderHistory(getLead(currentLeadId));
+}
+
+function changeDay(delta) {
+  const [y,m,d]=viewingDate.split('-').map(Number);
+  viewingDate=new Date(y,m-1,d+delta).toISOString().slice(0,10);
+  renderDetail(getLead(currentLeadId));
+}
+
+function renderDetail(lead) {
+  document.getElementById('call-outcome-panel').style.display='none';
+  document.getElementById('detail-name').textContent=lead.name;
+  const meta=[lead.company,lead.phone,lead.email].filter(Boolean).join(' · ');
+  document.getElementById('detail-meta').textContent=meta||'No contact info';
+  const sel=document.getElementById('detail-rep-select');
+  sel.innerHTML=`<option value="">— Unassigned —</option>`+reps.map(r=>`<option value="${r.id}" ${lead.repId===r.id?'selected':''}>${esc(r.name)}</option>`).join('');
+  const today=todayKey();
+  const isToday=viewingDate===today;
+  const isPast=viewingDate<today;
+  document.getElementById('nav-label').innerHTML=isToday?`<span class="today-pill">Today</span>`:esc(formatDateLabel(viewingDate));
+  document.getElementById('nav-next').disabled=isToday;
+  document.getElementById('log-date-label').textContent=isToday?'Today':formatDateLabel(viewingDate);
+  const ds=getDayStats(lead,viewingDate);
+  const el=document.getElementById('count-call');
+  if(el)el.textContent=ds['call']||0;
+  const callBtn=document.getElementById('btn-call');
+  if(callBtn)callBtn.classList.toggle('past',isPast);
+  renderLog(lead,viewingDate);
+}
+
+function renderLog(lead,dk) {
+  const list=document.getElementById('log-list');
+  const entries=getDayLog(lead,dk);
+  if(!entries.length){
+    list.innerHTML=`<div style="color:var(--text3);font-size:0.8125rem;padding:12px 0">${dk===todayKey()?'No entries yet — log a call above.':'No activity recorded on this date.'}</div>`;
+    return;
+  }
+  const isToday=dk===todayKey();
+  const indexed=entries.map((e,i)=>({...e,realIdx:i}));
+  list.innerHTML=[...indexed].reverse().map(e=>{
+    const outcomeLabel = e.outcome ? `${LOG_LABELS[e.type]||e.type} → ${LOG_LABELS[e.outcome]||e.outcome}` : (LOG_LABELS[e.type]||e.type);
+    const dotClass = e.outcome||e.type;
+    return`<div class="log-item">
+      <span class="log-indicator ${dotClass}"></span>
+      <span class="log-text">${outcomeLabel}</span>
+      ${e.note?`<span class="log-note-text">"${esc(e.note)}"</span>`:''}
+      <span class="log-time">${e.time}</span>
+      ${isToday?`<button class="log-delete" onclick="deleteLogEntry(${e.realIdx})" title="Remove">✕</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function deleteLogEntry(idx) {
+  const lead=getLead(currentLeadId);
+  const dk=todayKey();
+  if(!lead.dayLogs||!lead.dayLogs[dk])return;
+  const entry=lead.dayLogs[dk][idx];
+  if(!entry)return;
+  if(lead.days&&lead.days[dk]&&lead.days[dk][entry.type]>0) lead.days[dk][entry.type]--;
+  if(entry.outcome&&lead.days&&lead.days[dk]&&lead.days[dk][entry.outcome]>0) lead.days[dk][entry.outcome]--;
+  lead.dayLogs[dk].splice(idx,1);
+  save(); renderDetail(lead);
+}
+
+function renderHistory(lead) {
+  const container = document.getElementById('history-graphic-container');
+  if (!lead.days || !Object.keys(lead.days).length) {
+    container.innerHTML = `<div style="color:var(--text3);font-size:0.8125rem;padding:40px 0;text-align:center">No history — log some calls to see data here.</div>`;
+    return;
+  }
+  const today = todayKey();
+  const PAID_KEYS = new Set(['paid-deposit','fully-paid','paid-trial','will-register','interested','await-payment']);
+  const COLS = [
+    { key:'call',          icon:'📞', label:'Calls' },
+    { key:'vm',            icon:'📬', label:'VM' },
+    { key:'ni',            icon:'🚫', label:'NI' },
+    { key:'cb',            icon:'🔁', label:'CB' },
+    { key:'interested',    icon:'🙌', label:'Interested' },
+    { key:'will-register', icon:'📝', label:'Will Reg' },
+    { key:'paid-deposit',  icon:'💵', label:'Deposit' },
+    { key:'await-payment', icon:'⏳', label:'Awaiting' },
+    { key:'free-trial',    icon:'🆓', label:'Free Trial' },
+    { key:'paid-trial',    icon:'🧪', label:'Paid Trial' },
+    { key:'already-reg',   icon:'🔖', label:'Alr. Reg' },
+    { key:'fully-paid',    icon:'✅', label:'Fully Paid' },
+    { key:'other',         icon:'💬', label:'Other' },
+    { key:'makeup-lesson', icon:'🎨', label:'Makeup' },
+  ];
+  const activeDays = Object.keys(lead.days).sort((a,b)=>b.localeCompare(a))
+    .filter(dk => ALL_TYPES.reduce((s,t)=>s+(lead.days[dk][t]||0),0) > 0);
+  if (!activeDays.length) {
+    container.innerHTML = `<div style="color:var(--text3);font-size:0.8125rem;padding:40px 0;text-align:center">No activity recorded yet.</div>`;
+    return;
+  }
+  const grand = {};
+  COLS.forEach(c => { grand[c.key] = activeDays.reduce((s,dk)=>s+(lead.days[dk][c.key]||0),0); });
+  const activeCols = COLS.filter(c => grand[c.key] > 0);
+  const paidCols   = activeCols.filter(c => PAID_KEYS.has(c.key));
+  const hasPaid    = paidCols.length > 0;
+
+  let paidHero = '';
+  if (hasPaid) {
+    const chips = paidCols.map(c => `
+      <div class="hg-paid-chip">
+        <span class="hg-paid-chip-icon">${c.icon}</span>
+        <span class="hg-paid-chip-num">${grand[c.key]}</span>
+        <span class="hg-paid-chip-lbl">${c.label}</span>
+      </div>`).join('');
+    paidHero = `<div class="hg-paid-hero"><div class="hg-paid-hero-title">Revenue outcomes — all time</div><div class="hg-paid-grid">${chips}</div></div>`;
+  }
+
+  const thCells = activeCols.map(c => {
+    const isPaid = PAID_KEYS.has(c.key);
+    return `<th class="${isPaid?'th-paid':''}"><span class="hg-th-icon">${c.icon}</span>${c.label}</th>`;
+  }).join('');
+
+  const rows = activeDays.map((dk, idx) => {
+    const ds = lead.days[dk];
+    const isToday = dk === today;
+    const dateLbl = isToday ? 'Today' : formatDateLabel(dk);
+    const callCount = ds['call'] || 0;
+    const dateCell = `<td><div class="hg-date-cell">
+      ${isToday ? '<span class="hg-today-dot"></span>' : ''}
+      <span style="${isToday?'font-weight:600;color:var(--accent)':''}">${esc(dateLbl)}</span>
+      ${isToday ? '<span class="hg-today-label">Today</span>' : ''}
+      ${callCount > 0 ? `<span class="hg-calls-pill">${callCount}</span>` : ''}
+    </div></td>`;
+    const dataCells = activeCols.map(c => {
+      const v = ds[c.key] || 0;
+      const isPaid = PAID_KEYS.has(c.key);
+      if (v === 0) return `<td><span class="hg-cell">—</span></td>`;
+      return `<td><span class="hg-cell ${isPaid?'v-paid':'v'}">${v}</span></td>`;
+    }).join('');
+    return `<tr class="${isToday?'hg-today-row':''}">${dateCell}${dataCells}</tr>`;
+  }).join('');
+
+  const footDate = `<td>All Time</td>`;
+  const footCells = activeCols.map(c => {
+    const v = grand[c.key];
+    const isPaid = PAID_KEYS.has(c.key);
+    return `<td class="${isPaid?'td-paid-total':''}">${v || '—'}</td>`;
+  }).join('');
+
+  const sheet = `<div class="hg-sheet-wrap ${hasPaid?'':'standalone'}"><div style="overflow-x:auto"><table class="hg-sheet"><thead><tr><th>Date</th>${thCells}</tr></thead><tbody>${rows}</tbody><tfoot><tr>${footDate}${footCells}</tr></tfoot></table></div></div>`;
+  container.innerHTML = paidHero + sheet;
+}
+
+function reassignLead(repId) {
+  const lead=getLead(currentLeadId);
+  if(lead){lead.repId=repId||null;save();}
+}
+
+const CALL_OUTCOMES = [
+  { type:'vm',            label:'Voicemail',          icon:'📬' },
+  { type:'ni',            label:'Not Interested',     icon:'🚫' },
+  { type:'cb',            label:'Callback',           icon:'🔁' },
+  { type:'interested',    label:'Interested',         icon:'🙌' },
+  { type:'will-register', label:'Will Register',      icon:'📝' },
+  { type:'paid-deposit',  label:'Paid Deposit',       icon:'💵' },
+  { type:'await-payment', label:'Awaiting Payment',   icon:'⏳' },
+  { type:'free-trial',    label:'Free Trial',         icon:'🆓' },
+  { type:'paid-trial',    label:'Paid Trial',         icon:'🧪' },
+  { type:'already-reg',   label:'Already Registered', icon:'🔖' },
+  { type:'fully-paid',    label:'Fully Paid',         icon:'✅' },
+  { type:'other',         label:'Other',              icon:'💬' },
+  { type:'makeup-lesson', label:'Makeup Lesson',      icon:'🎨' },
+];
+
+function startCall() {
+  if(viewingDate!==todayKey())return;
+  const panel=document.getElementById('call-outcome-panel');
+  document.getElementById('call-outcome-grid').innerHTML=CALL_OUTCOMES.map(o=>`
+    <button onclick="logCallWithOutcome('${o.type}')" class="outcome-btn">
+      <span class="outcome-btn-icon">${o.icon}</span>${o.label}
+    </button>`).join('');
+  panel.style.display='block';
+  pulse('btn-call');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function cancelCallOutcome() {
+  document.getElementById('call-outcome-panel').style.display='none';
+}
+
+function logCallWithOutcome(outcomeType) {
+  if(viewingDate!==todayKey())return;
+  const lead=getLead(currentLeadId);
+  const note=document.getElementById('note-input').value.trim();
+  const today=todayKey();
+  if(!lead.days)lead.days={};
+  if(!lead.days[today])lead.days[today]=emptyDayStats();
+  if(!lead.dayLogs)lead.dayLogs={};
+  if(!lead.dayLogs[today])lead.dayLogs[today]=[];
+  lead.days[today]['call']=(lead.days[today]['call']||0)+1;
+  lead.days[today][outcomeType]=(lead.days[today][outcomeType]||0)+1;
+  const time=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  lead.dayLogs[today].push({type:'call',outcome:outcomeType,note,time});
+  document.getElementById('note-input').value='';
+  document.getElementById('call-outcome-panel').style.display='none';
+  pulse('btn-call');
+  save(); renderDetail(lead);
+}
+
+function pulse(id) {
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse');
+}
+function esc(str) {
+  return String(str||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function openNewLeadModal() {
+  const sel=document.getElementById('inp-rep');
+  sel.innerHTML=`<option value="">— Unassigned —</option>`+reps.map(r=>`<option value="${r.id}" ${myName&&r.name===myName?'selected':''}>${esc(r.name)}</option>`).join('');
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('inp-name').focus(),50);
+}
+function closeModal(event) {
+  if(event&&event.target!==document.getElementById('modal-overlay'))return;
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('inp-name').value='';
+}
+function createLead() {
+  const name=document.getElementById('inp-name').value.trim();
+  if(!name){document.getElementById('inp-name').focus();return;}
+  const repId=document.getElementById('inp-rep').value||null;
+  const lead={id:Date.now().toString(),name,company:'',phone:'',email:'',repId,days:{},dayLogs:{},created:new Date().toISOString()};
+  leads.unshift(lead);save();
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('inp-name').value='';
+  openLead(lead.id);
+}
+function deleteLead(id) {
+  leads=leads.filter(l=>l.id!==id);save();renderDashboard();
+}
+
+function openManageRepsModal() {
+  renderRepsList();
+  document.getElementById('new-rep-input').value='';
+  document.getElementById('reps-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('new-rep-input').focus(),50);
+}
+function closeManageRepsModal(event) {
+  if(event&&event.target!==document.getElementById('reps-modal'))return;
+  document.getElementById('reps-modal').classList.remove('open');
+  renderDashboard();
+}
+function renderRepsList() {
+  const container=document.getElementById('reps-list');
+  if(!reps.length){container.innerHTML=`<div style="color:var(--text3);font-size:0.8125rem;padding:8px 0">No reps yet. Add one below.</div>`;return;}
+  container.innerHTML=reps.map(r=>{
+    const c=repColor(r.id);
+    const isMe=r.name.toLowerCase()===myName.toLowerCase();
+    return`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--r-md);background:var(--gray-50)" id="rep-row-${r.id}">
+      <span style="width:26px;height:26px;border-radius:50%;background:${c.text};color:#fff;font-size:10px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0">${esc(repInitials(r.name))}</span>
+      <input value="${esc(r.name)}" id="rep-name-input-${r.id}"
+        style="flex:1;border:1px solid transparent;border-radius:var(--r);padding:3px 7px;font-family:'Inter',sans-serif;font-size:0.875rem;font-weight:500;color:var(--text);background:transparent;outline:none;transition:all 0.12s"
+        onfocus="this.style.borderColor='var(--accent)';this.style.background='var(--surface)'"
+        onblur="this.style.borderColor='transparent';this.style.background='transparent'"
+        onkeydown="if(event.key==='Enter')saveRepName('${r.id}')">
+      ${isMe?`<span style="font-size:0.625rem;color:var(--accent);font-weight:600;padding:2px 6px;border:1px solid var(--blue-200);border-radius:20px;white-space:nowrap">You</span>`:''}
+      <button class="btn btn-secondary btn-sm" onclick="saveRepName('${r.id}')" title="Save">Save</button>
+      <button class="btn btn-danger-sm" onclick="deleteRep('${r.id}')" title="Remove">✕</button>
+    </div>`;
+  }).join('');
+}
+function saveRepName(repId) {
+  const input=document.getElementById('rep-name-input-'+repId);
+  if(!input)return;
+  const newName=input.value.trim();
+  if(!newName)return;
+  const rep=getRep(repId);
+  if(!rep)return;
+  const oldName=rep.name;
+  rep.name=newName;
+  if(oldName.toLowerCase()===myName.toLowerCase()){
+    myName=newName; localStorage.setItem('myName',myName);
+    updateHeaderRep();
+  }
+  save(); renderRepsList();
+}
+function addNewRep() {
+  const input=document.getElementById('new-rep-input');
+  const name=input.value.trim();
+  if(!name)return;
+  ensureRep(name);
+  input.value='';
+  input.focus();
+  renderRepsList();
+}
+function deleteRep(repId) {
+  const rep=getRep(repId);
+  if(!rep)return;
+  reps=reps.filter(r=>r.id!==repId);
+  leads.forEach(l=>{ if(l.repId===repId) l.repId=null; });
+  if(filterRep===repId) filterRep='all';
+  save(); renderRepsList();
+}
+
+// --- OFFICE REPORT ---
+function openOfficeReport() {
+  const dateEl = document.getElementById('report-date');
+  dateEl.value = todayKey();
+  const repSel = document.getElementById('report-rep');
+  repSel.innerHTML = `<option value="all">All Reps</option>` + reps.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('');
+  const myRep = reps.find(r=>r.name.toLowerCase()===myName.toLowerCase());
+  if(myRep) repSel.value = myRep.id;
+  buildReport();
+  document.getElementById('report-modal').classList.add('open');
+}
+function closeOfficeReport(event) {
+  if(event&&event.target!==document.getElementById('report-modal'))return;
+  document.getElementById('report-modal').classList.remove('open');
+}
+function buildReport() {
+  const dk = document.getElementById('report-date').value || todayKey();
+  const repFilter = document.getElementById('report-rep').value;
+  const dateLabel = formatDateLabel(dk);
+  const SHORT = { call:'Call', vm:'Voicemail', ni:'NI', cb:'Call Back', interested:'Interested', 'paid-deposit':'Paid Deposit', 'await-payment':'Awaiting Payment', 'free-trial':'Free Trial', 'paid-trial':'Paid Trial', 'already-reg':'Already Registered', 'fully-paid':'Fully Paid', 'will-register':'Will Register', 'other':'Other', 'makeup-lesson':'Makeup Lesson' };
+  const filtered = repFilter==='all' ? leads : leads.filter(l=>l.repId===repFilter);
+  if(!filtered.length){ document.getElementById('report-preview').textContent='No leads found.'; return; }
+  const byRep = {};
+  filtered.forEach(lead=>{ const id=lead.repId||'__none__'; if(!byRep[id])byRep[id]=[]; byRep[id].push(lead); });
+  let lines = [`Lead Report — ${dateLabel}`, ''];
+  Object.entries(byRep).forEach(([repId, repLeads])=>{
+    const repName = repId==='__none__'?'Unassigned':(getRep(repId)?.name||'Unknown');
+    lines.push(`${repName.toUpperCase()}:`);
+    let hasAny=false;
+    repLeads.forEach(lead=>{
+      const ds=getDayStats(lead,dk);
+      const total=ALL_TYPES.reduce((s,t)=>s+(ds[t]||0),0);
+      if(!total)return;
+      hasAny=true;
+      const parts=ALL_TYPES.filter(t=>ds[t]>0).map(t=>`${String(ds[t]).padStart(2,'0')} ${SHORT[t]}`);
+      lines.push(`  ${lead.name}: ${parts.join(', ')}`);
+    });
+    if(!hasAny) lines.push('  (No activity on this date)');
+    lines.push('');
+  });
+  const totals=emptyDayStats();
+  filtered.forEach(lead=>{ const ds=getDayStats(lead,dk); ALL_TYPES.forEach(t=>{totals[t]+=(ds[t]||0);}); });
+  const totalParts=ALL_TYPES.filter(t=>totals[t]>0).map(t=>`${String(totals[t]).padStart(2,'0')} ${SHORT[t]}`);
+  if(totalParts.length) lines.push(`TOTALS: ${totalParts.join(', ')}`);
+  document.getElementById('report-preview').textContent=lines.join('\n');
+}
+function copyReport() {
+  const text=document.getElementById('report-preview').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copy-report-btn');
+    btn.textContent='Copied!';
+    setTimeout(()=>{ btn.textContent='Copy to Clipboard'; },2000);
+  });
+}
+
+updateHeaderDate();
+checkSetup();
+if(myName)renderDashboard();
+</script>
+</body>
+</html>
